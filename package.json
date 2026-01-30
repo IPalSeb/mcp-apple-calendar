@@ -1,0 +1,38 @@
+{
+  "name": "mcp-apple-calendar",
+  "version": "1.0.0",
+  "description": "MCP server for interacting with Apple Calendar on macOS via AppleScript",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "mcp-apple-calendar": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js"
+  },
+  "keywords": [
+    "mcp",
+    "apple-calendar",
+    "macos",
+    "applescript",
+    "model-context-protocol"
+  ],
+  "author": "IPalSeb",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

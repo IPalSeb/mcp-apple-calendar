@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { runAppleScript } from "../lib/applescript.js";
+import { runAppleScript, escapeAppleScript } from "../lib/applescript.js";
 
 export function registerDeleteEvent(server: McpServer) {
   server.tool(
@@ -13,8 +13,8 @@ export function registerDeleteEvent(server: McpServer) {
     async ({ title, calendar }) => {
       const script = `
 tell application "Calendar"
-  tell calendar "${calendar}"
-    set matchingEvents to (every event whose summary is "${title}")
+  tell calendar "${escapeAppleScript(calendar)}"
+    set matchingEvents to (every event whose summary is "${escapeAppleScript(title)}")
     set eventCount to count of matchingEvents
     delete matchingEvents
     return eventCount

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { runAppleScript, isoToAppleScriptDate } from "../lib/applescript.js";
+import { runAppleScript, isoToAppleScriptDateVar, escapeAppleScript } from "../lib/applescript.js";
 
 export function registerListEvents(server: McpServer) {
   server.tool(
@@ -12,18 +12,18 @@ export function registerListEvents(server: McpServer) {
       calendar: z.string().optional().describe("Filter by calendar name"),
     },
     async ({ start, end, calendar }) => {
-      const startDate = isoToAppleScriptDate(start);
-      const endDate = isoToAppleScriptDate(end);
+      const setD1 = isoToAppleScriptDateVar(start, "d1");
+      const setD2 = isoToAppleScriptDateVar(end, "d2");
 
       const calendarFilter = calendar
-        ? `set cals to {calendar "${calendar}"}`
+        ? `set cals to {calendar "${escapeAppleScript(calendar)}"}`
         : `set cals to calendars`;
 
       const script = `
 tell application "Calendar"
   ${calendarFilter}
-  set d1 to date "${startDate}"
-  set d2 to date "${endDate}"
+  ${setD1}
+  ${setD2}
   set output to ""
   repeat with cal in cals
     set evts to (every event of cal whose start date >= d1 and start date < d2)

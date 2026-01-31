@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { runAppleScript, isoToAppleScriptDate } from "../lib/applescript.js";
+import { runAppleScript, isoToAppleScriptDateVar, escapeAppleScript } from "../lib/applescript.js";
 
 export function registerCreateEvent(server: McpServer) {
   server.tool(
@@ -16,28 +16,30 @@ export function registerCreateEvent(server: McpServer) {
       allDay: z.boolean().optional().default(false).describe("Whether this is an all-day event"),
     },
     async ({ title, start, end, calendar, location, description, allDay }) => {
-      const startDate = isoToAppleScriptDate(start);
-      const endDate = isoToAppleScriptDate(end);
+      const setStartDate = isoToAppleScriptDateVar(start, "startDate");
+      const setEndDate = isoToAppleScriptDateVar(end, "endDate");
 
       const properties = [
-        `summary:"${title}"`,
-        `start date:date "${startDate}"`,
-        `end date:date "${endDate}"`,
+        `summary:"${escapeAppleScript(title)}"`,
+        `start date:startDate`,
+        `end date:endDate`,
       ];
 
       if (allDay) {
         properties.push(`allday event:true`);
       }
       if (description) {
-        properties.push(`description:"${description.replace(/"/g, '\\"')}"`);
+        properties.push(`description:"${escapeAppleScript(description)}"`);
       }
       if (location) {
-        properties.push(`location:"${location.replace(/"/g, '\\"')}"`);
+        properties.push(`location:"${escapeAppleScript(location)}"`);
       }
 
       const script = `
 tell application "Calendar"
-  tell calendar "${calendar}"
+  ${setStartDate}
+  ${setEndDate}
+  tell calendar "${escapeAppleScript(calendar)}"
     make new event with properties {${properties.join(", ")}}
   end tell
 end tell`;
@@ -51,8 +53,8 @@ end tell`;
               text: JSON.stringify({
                 success: true,
                 message: `Event "${title}" created in calendar "${calendar}"`,
-                start: startDate,
-                end: endDate,
+                start,
+                end,
               }, null, 2),
             },
           ],

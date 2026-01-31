@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { runAppleScript } from "../lib/applescript.js";
+import { runAppleScript, escapeAppleScript } from "../lib/applescript.js";
 
 export function registerSearchEvents(server: McpServer) {
   server.tool(
@@ -13,7 +13,7 @@ export function registerSearchEvents(server: McpServer) {
     },
     async ({ query, calendar, limit }) => {
       const calendarFilter = calendar
-        ? `set cals to {calendar "${calendar}"}`
+        ? `set cals to {calendar "${escapeAppleScript(calendar)}"}`
         : `set cals to calendars`;
 
       const script = `
@@ -22,7 +22,7 @@ tell application "Calendar"
   set output to ""
   set count_ to 0
   repeat with cal in cals
-    set evts to (every event of cal whose summary contains "${query}")
+    set evts to (every event of cal whose summary contains "${escapeAppleScript(query)}")
     repeat with e in evts
       if count_ < ${limit} then
         set output to output & summary of e & " | " & name of cal & " | " & start date of e & " → " & end date of e & linefeed
